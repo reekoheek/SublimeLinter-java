@@ -1,9 +1,9 @@
 #
 # linter.py
-# Linter for SublimeLinter3, a code checking framework for Sublime Text 3
+# Linter for SublimeLinter3, a code checking framework for Sublime Text 3 (Java)
 #
-# Written by Jafar Shadiq,,,
-# Copyright (c) 2013 Jafar Shadiq,,,
+# Written by Ganesha <reekoheek@gmail.com>
+# Copyright (c) 2013 Ganesha <reekoheek@gmail.com>
 #
 # License: MIT
 #
@@ -14,7 +14,7 @@ import os
 import glob
 import shutil
 import tempfile
-from SublimeLinter.lint import Linter, util, persist
+from SublimeLinter.lint import Linter, util
 
 
 class Java(Linter):
