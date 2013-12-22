@@ -7,14 +7,7 @@ This linter plugin for [SublimeLinter](https://github.com/SublimeLinter/SublimeL
 SublimeLinter 3 must be installed in order to use this plugin. If SublimeLinter 3 is not installed, please follow the instructions [here](https://github.com/SublimeLinter/SublimeLinter.github.io/wiki/Installation).
 
 ### Linter installation
-Before using this plugin, you must ensure that `java` is installed on your system. To install `java`, do the following:
-
-1. Install Other.
-
-1. Install `java` by typing the following in a terminal:
-   ```
-   <package manager> install java
-   ```
+Before using this plugin, you must ensure that `java` is installed on your system.
 
 Once java is installed, you can proceed to install the SublimeLinter-java plugin if it is not yet installed.
 
@@ -28,6 +21,29 @@ To install via Package Control, do the following:
 1. When the plugin list appears, type `java`. Among the entries you should see `SublimeLinter-java`. If that entry is not highlighted, use the keyboard or mouse to select it.
 
 ## Settings
+SublimeLinter-java use project settings (*.sublime-project files) to define classpath:
+
+```
+{
+   "folders":
+   [
+   	...
+   ],
+   "SublimeLinter": {
+      "linters": {
+         "java": {
+            "classpath": [
+               "$ANDROID_SDK/platforms/android-19/android.jar",
+               "$PROJECT_PATH/src"
+            ]
+         }
+      }
+   }
+}
+
+```
+
+
 For general information on how SublimeLinter works with settings, please see [Settings](https://github.com/SublimeLinter/SublimeLinter.github.io/wiki/Settings). For information on generic linter settings, please see [Linter Settings](https://github.com/SublimeLinter/SublimeLinter.github.io/wiki/Linter-Settings).
 
 In addition to the standard SublimeLinter settings, SublimeLinter-java provides its own settings. Those marked as “Inline Setting” or “Inline Override” may also be [used inline](https://github.com/SublimeLinter/SublimeLinter.github.io/wiki/Settings#inline-settings).
