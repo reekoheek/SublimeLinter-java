@@ -1,0 +1,10 @@
+SublimeLinter-java
+-------------------------------
+This linter plugin for SublimeLinter provides an interface to java.
+
+** IMPORTANT! **
+
+Before this plugin will activate, you *must*
+follow the installation instructions here:
+
+https://github.com/Jafar Shadiq,,,/SublimeLinter-java
