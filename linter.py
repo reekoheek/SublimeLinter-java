@@ -14,6 +14,7 @@ import os
 import glob
 import shutil
 import tempfile
+import re
 from SublimeLinter.lint import Linter, util
 
 
@@ -27,6 +28,7 @@ class Java(Linter):
     executable = 'javac'
     # regex = r'^.+?:(?P<line>\d+):\s*(?:(?P<warning>warning)|(?P<error>error)):\s*(?P<message>.+)'
     # multiline = False
+    head_regex = r'^.+?:(?P<line>\d+):\s*(?:(?P<warning>warning)|(?P<error>error)):\s*(?P<message>.+)$'
     regex = r'''(?xi)
         # First line is (lineno): type: error message
         ^.+?:(?P<line>\d+):\s*(?:(?P<warning>warning)|(?P<error>error)):\s*(?P<message>.+)$\r?\n
@@ -64,7 +66,7 @@ class Java(Linter):
 
         d = tempfile.mkdtemp('', 'sublimelinter-java-')
 
-        command = [self.executable_path, '-d', d]
+        command = [self.executable_path, '-Xlint', '-d', d]
 
         settings = self.get_view_settings()
         classpath = settings.get("classpath")
@@ -79,7 +81,6 @@ class Java(Linter):
             command += ['-cp', classpath]
 
         command += ['@']
-        # print(command)
         return command
 
     def tmpfile(self, cmd, code, suffix=''):
@@ -100,12 +101,52 @@ class Java(Linter):
             else:
                 cmd.append(f.name)
 
-            # print(cmd)
+            # print(' '.join(cmd))
 
             out = util.popen(cmd, output_stream=self.error_stream)
             if out:
                 out = out.communicate()
-                return util.combine_output(out)
+                filtered = ''
+                skip = 0
+                lines = util.combine_output(out).split('\n')
+                errline = []
+                for line in lines:
+                    if line == '':
+                        continue
+                    if skip > 0:
+                        skip = skip - 1
+                    else:
+                        match = re.match(self.head_regex, line)
+                        if match:
+                            if len(errline) > 0:
+                                filtered += errline[0];
+                                if len(errline) > 3:
+                                    filtered += ", " + (errline[3].strip())
+                                if len(errline) > 4:
+                                    filtered += ", " + (errline[4].strip())
+                                filtered += "\n"
+                                filtered += errline[1] + "\n"
+                                filtered += errline[2] + "\n"
+                            errline = []
+                        if match and (not filename in line):
+                            skip = 2
+                        else:
+                            errline.append(line)
+
+                if len(errline) > 0:
+                    filtered += errline[0];
+                    if len(errline) > 3:
+                        filtered += ", " + (errline[3].strip())
+                    if len(errline) > 4:
+                        filtered += ", " + (errline[4].strip())
+                    filtered += "\n"
+                    filtered += errline[1] + "\n"
+                    filtered += errline[2] + "\n"
+                # print("-------------")
+                # print(filtered)
+                # print("-------------")
+                return filtered
+                # return util.combine_output(out)
             else:
                 return ''
 
