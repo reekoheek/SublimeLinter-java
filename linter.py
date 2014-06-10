@@ -62,12 +62,24 @@ class Java(Linter):
         settings = self.get_view_settings()
 
         directory = settings.get("directory")
+        target = settings.get("target")
+        source = settings.get("source")
+        bootclasspath = settings.get("bootclasspath")
 
         # sometimes settings does not read from project settings and directory is empty
         if directory == None:
             return []
 
         command = [self.executable_path, '-Xlint', '-d', directory]
+
+        if target != None:
+            command += ['-target', target]
+
+        if source != None:
+            command += ['-source', source]
+
+        if bootclasspath != None:
+            command += ['-bootclasspath', bootclasspath]
 
         classpath = settings.get("classpath")
 
@@ -83,7 +95,6 @@ class Java(Linter):
         if classpath != "":
             command += ['-cp', classpath]
 
-        # command += ['-source', '1.5']
         command += ['@']
 
         # print(command)
@@ -104,7 +115,7 @@ class Java(Linter):
             else:
                 cmd.append(f.name)
 
-            # print(' '.join(cmd))
+            print("cmd", ' '.join(cmd))
 
             out = util.popen(cmd, output_stream=self.error_stream)
             if out:
@@ -129,8 +140,8 @@ class Java(Linter):
                     else:
                         match = re.match(self.head_regex, line)
                         if match:
-                            # print("errline:", errline)
                             if len(errline) > 0:
+                                print("errline:", errline)
                                 filtered += errline[0];
                                 if len(errline) > 3:
                                     filtered += ", " + (errline[3].strip())
@@ -144,20 +155,29 @@ class Java(Linter):
                         if match and (not self.filename in line):
                             skip = 2
                         else:
+                            print("line:", line)
                             errline.append(line)
 
+                print("errline:", len(errline), errline)
                 if len(errline) > 0:
                     filtered += errline[0];
+
                     if len(errline) > 3:
                         filtered += ", " + (errline[3].strip())
+
                     if len(errline) > 4:
                         filtered += ", " + (errline[4].strip())
                     filtered += "\n"
+
                     filtered += errline[1] + "\n"
-                    filtered += errline[2] + "\n"
-                # print("-------------")
-                # print(filtered)
-                # print("-------------")
+
+                    if len(errline) > 2:
+                        filtered += errline[2] + "\n"
+
+
+                print("-------------")
+                print(filtered)
+                print("-------------")
                 return filtered
                 # return util.combine_output(out)
             else:

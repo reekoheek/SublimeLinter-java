@@ -29,16 +29,23 @@ SublimeLinter-java use project settings (*.sublime-project files) to define clas
    [
    	...
    ],
-   "SublimeLinter": {
-      "linters": {
-         "java": {
-            "classpath": [
-               "$ANDROID_SDK/platforms/android-19/android.jar",
-               "$PROJECT_PATH/src"
-            ]
-         }
-      }
-   }
+   "SublimeLinter":
+    {
+        "linters": {
+            "java":
+            {
+                "directory": "$PROJECT_PATH/platforms/android/ant-build/classes",
+                "classpath": [
+                   "$ANDROID_SDK/platforms/android-19/android.jar",
+                   "$PROJECT_PATH/platforms/android/CordovaLib/ant-build/classes.jar",
+                   "$PROJECT_PATH/platforms/android/src"
+                ],
+                "target": "1.5",
+                "source": "1.5",
+                "bootclasspath": "$JAVA_HOME/lib/rt.jar"
+            }
+        }
+    }
 }
 
 ```
