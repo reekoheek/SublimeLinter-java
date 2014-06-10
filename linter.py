@@ -59,19 +59,22 @@ class Java(Linter):
 
         """
 
-        d = tempfile.mkdtemp('', 'sublimelinter-java-')
-        listing = glob.glob(tempfile.tempdir + '/sublimelinter-java-*')
-        for filename in listing:
-            shutil.rmtree(filename, True)
-
-        d = tempfile.mkdtemp('', 'sublimelinter-java-')
-
-        command = [self.executable_path, '-Xlint', '-d', d]
-
         settings = self.get_view_settings()
+
+        directory = settings.get("directory")
+
+        # sometimes settings does not read from project settings and directory is empty
+        if directory == None:
+            return []
+
+        command = [self.executable_path, '-Xlint', '-d', directory]
+
         classpath = settings.get("classpath")
+
         if isinstance(classpath, str):
             classpath = classpath
+        elif classpath == None:
+            classpath = ""
         elif all(isinstance(item, str) for item in classpath): # check iterable for stringness of all items. Will raise TypeError if some_object is not iterable
             classpath = ":".join(classpath)
         else:
@@ -80,24 +83,24 @@ class Java(Linter):
         if classpath != "":
             command += ['-cp', classpath]
 
+        # command += ['-source', '1.5']
         command += ['@']
+
+        # print(command)
+
         return command
 
     def tmpfile(self, cmd, code, suffix=''):
         """Run an external executable using a temp file to pass code and return its output."""
+
         filename = os.path.basename(self.filename)
 
         try:
-            d = tempfile.mkdtemp('', 'sublimelinter-javasource-')
-
-            f = open(d + '/' + filename,'w')
-            f.write(code)
-            f.close()
-
             cmd = list(cmd)
 
+
             if '@' in cmd:
-                cmd[cmd.index('@')] = f.name
+                cmd[cmd.index('@')] = self.filename
             else:
                 cmd.append(f.name)
 
@@ -109,15 +112,24 @@ class Java(Linter):
                 filtered = ''
                 skip = 0
                 lines = util.combine_output(out).split('\n')
+
                 errline = []
                 for line in lines:
+                    # print("line:", line)
                     if line == '':
                         continue
+
+                    match = re.match(r'warning: \[path\] bad path element', line)
+                    if match:
+                        filtered += self.filename + ":1: " + line + "\n\n\n"
+                        continue
+
                     if skip > 0:
                         skip = skip - 1
                     else:
                         match = re.match(self.head_regex, line)
                         if match:
+                            # print("errline:", errline)
                             if len(errline) > 0:
                                 filtered += errline[0];
                                 if len(errline) > 3:
@@ -128,7 +140,8 @@ class Java(Linter):
                                 filtered += errline[1] + "\n"
                                 filtered += errline[2] + "\n"
                             errline = []
-                        if match and (not filename in line):
+
+                        if match and (not self.filename in line):
                             skip = 2
                         else:
                             errline.append(line)
@@ -149,6 +162,8 @@ class Java(Linter):
                 # return util.combine_output(out)
             else:
                 return ''
-
+        # except:
+        #     pass
         finally:
-            shutil.rmtree(d, True)
+            pass
+            # shutil.rmtree(d, True)
